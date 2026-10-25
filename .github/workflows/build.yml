@@ -8,13 +8,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: unzip -o VeerCAD_Motion_Android.zip
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      - name: Accept Android licences
+        run: |
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "sdk.dir=$SDK" > veercad-motion/local.properties
+          TOOL=$(ls -d "$SDK"/cmdline-tools/*/bin/sdkmanager | head -n 1)
+          yes | "$TOOL" --licenses > /dev/null || true
+          yes | "$TOOL" "platforms;android-34" "build-tools;34.0.0" > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
